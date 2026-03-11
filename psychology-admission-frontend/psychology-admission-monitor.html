@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0454应用心理专硕PSYMONO</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans SC', 'PingFang SC', sans-serif;
+      background: url('巴库赛道.jpeg') center/cover no-repeat;
+      background-color: #ffffff;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 2px; }
+
+    /* 布局 */
+    .container { display: flex; height: 100vh; border: none; box-shadow: none; background: transparent; }
+    .left-nav {
+      width: 220px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      border: none !important;
+      border-right: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      height: 100vh;
+    }
+    .nav-scrollable {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .nav-fixed-bottom {
+      flex-shrink: 0;
+    }
+    .center-list { 
+      width: 450px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; 
+      border: none !important;
+      border-left: none !important;
+      border-right: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .right-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 12px; display: flex; flex-direction: column;
+      justify-content: flex-end;
+      border: none !important;
+      border-left: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      height: 100vh;
+    }
+    .search-summary-panel-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh * 5 / 6);
+    }
+
+    /* 通用组件 */
+    .input {
+      background: rgba(255, 255, 255, 0.9); border-radius: 6px;
+      color: #1e293b; padding: 6px 10px; font-size: 12px; outline: none; width: 100%;
+    }
+    .btn-primary {
+      background: #1e40af; color: #bfdbfe; border: none;
+      border-radius: 7px; padding: 8px 14px; font-size: 12px;
+      cursor: pointer; font-weight: 700; width: 100%;
+    }
+    .btn-secondary {
+      background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;
+      border-radius: 7px; padding: 8px 14px; font-size: 12px;
+      cursor: pointer; font-weight: 600; width: 100%;
+    }
+    .btn-secondary:hover { color: #1e293b; border-color: #94a3b8; }
+    .btn-search {
+      background: #166534; color: #bbf7d0; border: none;
+      border-radius: 7px; padding: 8px 14px; font-size: 12px;
+      cursor: pointer; font-weight: 700; width: 100%;
+      margin-bottom: 6px;
+    }
+    .btn-search:hover { background: #15803d; }
+    .btn-danger {
+      background: #7f1d1d; color: #fecaca; border: none;
+      border-radius: 7px; padding: 6px 12px; font-size: 11px;
+      cursor: pointer; font-weight: 600;
+    }
+    .btn-danger:hover { background: #991b1b; }
+    .btn-small {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    /* 左侧导航 */
+    .nav-header {
+      padding: 16px 12px 12px;
+    }
+    .nav-title { font-size: 28px; font-weight: 900; color: #ffffff; line-height: 1.2; font-family: 'UnifrakturMaguntia', 'Fraktur', 'Blackletter', serif; letter-spacing: 2px; }
+    .nav-subtitle { font-size: 10px; color: #e2e8f0; margin-top: 4px; }
+    .nav-section { padding: 10px 12px 6px; }
+    .nav-section-title {
+      font-size: 10px; color: #cbd5e1; letter-spacing: 0.1em;
+      margin-bottom: 6px; font-weight: 700;
+    }
+    .nav-btn {
+      display: block; width: 100%; text-align: left; padding: 6px 10px;
+      border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
+      margin-bottom: 2px; border: none; background: transparent; color: #e2e8f0;
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.2); color: #ffffff; }
+    .nav-btn.active { background: rgba(59, 130, 246, 0.3); color: #93c5fd; }
+    .nav-group-item {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* 顶部栏 */
+    .topbar {
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      background: transparent;
+    }
+    .stats { display: flex; gap: 8px; font-size: 12px; color: #e2e8f0; }
+    .stats b { color: #ffffff; }
+    .stats .found { color: #4ade80; font-weight: 700; }
+    .stats .selected { color: #93c5fd; font-weight: 700; }
+
+    /* 多选栏 */
+    .multi-select-bar {
+      padding: 8px 16px;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      background: transparent;
+      color: #e2e8f0;
+    }
+    .multi-select-bar b {
+      color: #ffffff;
+    }
+    .multi-select-bar button {
+      padding: 4px 12px;
+      font-size: 11px;
+    }
+
+    /* 院校卡片 */
+    .school-list {
+      flex: 1; overflow-y: auto; padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .school-card {
+      background: rgba(255, 255, 255, 0.9); border-radius: 10px;
+      padding: 12px 14px; transition: all 0.2s; position: relative;
+    }
+    .school-card.found {
+    }
+    .school-card.selected {
+    }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-info { flex: 1; min-width: 0; }
+    .card-title {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+    }
+    .school-checkbox {
+      width: 14px; height: 14px; cursor: pointer;
+      accent-color: #60a5fa;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .school-name {
+      font-weight: 700; font-size: 14px; color: #1e293b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-meta {
+      font-size: 11px; color: #64748b; margin-bottom: 6px;
+    }
+    .quick-links { display: flex; gap: 4px; flex-wrap: wrap; }
+    .quick-link {
+      font-size: 10px; padding: 3px 7px; border-radius: 4px;
+      background: #e2e8f0; color: #475569; text-decoration: none;
+      display: flex; align-items: center; gap: 3px;
+      transition: all 0.15s; cursor: pointer;
+    }
+    .quick-link:hover { background: #cbd5e1; color: #1e293b; }
+    .card-actions {
+      display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+    }
+    .card-btn {
+      border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+      font-weight: 600; border: none;
+    }
+    .search-btn {
+      background: #16653430; color: #166534;
+    }
+    .search-btn:hover { background: #16653450; color: #14532d; }
+
+    /* 检索结果提示 */
+    .search-result {
+      font-size: 10px; padding: 4px 8px; border-radius: 4px;
+      margin-top: 6px; display: flex; align-items: center; gap: 4px;
+    }
+    .result-found {
+      background: #dcfce7; color: #166534;
+    }
+    .result-not-found {
+      background: #f1f5f9; color: #64748b;
+    }
+    .result-loading {
+      background: #dbeafe; color: #1e40af;
+    }
+    .result-error {
+      background: #fee2e2; color: #991b1b;
+    }
+
+    /* 右侧面板 */
+    .panel-section { border-radius: 8px; padding: 12px; }
+    .panel-title {
+      font-size: 10px; color: #cbd5e1; letter-spacing: 0.1em;
+      font-weight: 800; margin-bottom: 8px;
+    }
+    .panel-btn { margin-bottom: 6px; }
+    .stat-row {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;
+      font-size: 11px; color: #e2e8f0;
+    }
+    .stat-row .count { font-size: 13px; font-weight: 800; color: #ffffff; }
+    .rules { font-size: 10px; color: #cbd5e1; line-height: 1.7; }
+
+    /* 模态框 */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: rgba(255, 255, 255, 0.95); border-radius: 12px;
+      padding: 20px; min-width: 300px; max-width: 400px;
+    }
+    .modal-title {
+      font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1e293b;
+    }
+    .modal-buttons {
+      display: flex; gap: 8px; margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 左侧导航 -->
+    <div class="left-nav">
+      <div class="nav-header">
+        <div style="font-size: 9px; color: #cbd5e1; letter-spacing: 0.12em; font-weight: 800; margin-bottom: 4px;">0454应用心理专硕</div>
+        <div class="nav-title">PSYMONO</div>
+        <div class="nav-subtitle" id="school-count">加载中...</div>
+      </div>
+    </div>
+
+    <!-- 中间列表 -->
+    <div class="center-list">
+      <div class="topbar">
+        <input type="text" class="input" id="search-input" placeholder="搜索院校名称 / 省市..." style="width: 200px;">
+      </div>
+      <div class="multi-select-bar" id="multi-select-bar" style="display: none;">
+        <span style="font-size: 12px; color: #64748b;">已选择 <b id="selected-count">0</b> 所学校</span>
+        <button class="btn-secondary btn-small" id="add-to-group-btn">添加到分组</button>
+        <button class="btn-secondary btn-small" id="clear-selection-btn">清除选择</button>
+      </div>
+      <div class="school-list" id="school-list">
+        <div style="text-align: center; color: #64748b; padding: 60px 0; font-size: 14px;">正在加载数据...</div>
+      </div>
+    </div>
+
+    <!-- 右侧面板 -->
+    <div class="right-panel">
+    </div>
+  </div>
+
+  <!-- 新建分组模态框 -->
+  <div id="create-group-modal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-title">新建分组</div>
+      <input type="text" class="input" id="new-group-name" placeholder="请输入分组名称">
+      <div class="modal-buttons">
+        <button class="btn-secondary" id="cancel-create-group">取消</button>
+        <button class="btn-primary" id="confirm-create-group">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加到分组模态框 -->
+  <div id="add-to-group-modal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-title">选择分组或新建</div>
+      <div style="margin-bottom: 12px; display: flex; gap: 8px;">
+        <input type="text" class="input" id="new-group-name-add" placeholder="或输入新分组名称">
+        <button class="btn-primary" id="create-and-add-btn" style="white-space: nowrap;">创建并添加</button>
+      </div>
+      <div id="group-select-list" style="max-height: 200px; overflow-y: auto;"></div>
+      <div class="modal-buttons">
+        <button class="btn-secondary" id="cancel-add-group">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:5002/api';
+
+    let state = {
+      filters: { text: "", collection: "全部", group: null },
+      schools: [],
+      searchResults: {},
+      collections: new Set(),
+      groups: [],
+      selectedSchools: new Set(),
+      searchSummary: [],
+      lastSearchTime: null
+    };
+
+    async function apiRequest(endpoint, options = {}) {
+      try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+          },
+          ...options
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error('API请求错误:', error);
+        throw error;
+      }
+    }
+
+    async function loadSchools() {
+      try {
+        console.log('正在从', API_BASE_URL + '/schools', '加载学校数据...');
+        const data = await apiRequest('/schools');
+        console.log('学校数据加载成功:', data);
+        state.schools = data.schools;
+        await loadCollections();
+        await loadGroups();
+        await loadSearchResults();
+        render();
+      } catch (error) {
+        console.error('加载学校数据失败:', error);
+        const schoolListEl = document.getElementById('school-list');
+        if (schoolListEl) {
+          schoolListEl.innerHTML = 
+            '<div style="text-align: center; color: #dc2626; padding: 60px 0; font-size: 14px;">加载失败，请确保后端服务已启动<br><span style="font-size: 12px;">(查看控制台获取更多信息)</span></div>';
+        }
+      }
+    }
+
+    async function loadCollections() {
+      try {
+        const data = await apiRequest('/collections');
+        state.collections = new Set(data.collections.map(c => c.school_name));
+      } catch (error) {
+        console.error('加载收藏失败:', error);
+      }
+    }
+
+    async function loadGroups() {
+      try {
+        const data = await apiRequest('/groups');
+        state.groups = data.groups || [];
+        renderNavGroups();
+      } catch (error) {
+        console.error('加载分组失败:', error);
+      }
+    }
+
+    async function loadSearchResults() {
+      try {
+        const data = await apiRequest('/search/results');
+        state.searchResults = {};
+        state.searchSummary = [];
+        state.lastSearchTime = null;
+      } catch (error) {
+        console.error('加载搜索结果失败:', error);
+      }
+    }
+
+    async function searchSchool调剂Info(school) {
+      state.searchResults[school.name] = { loading: true, found: false, error: false, error_message: '' };
+      render();
+
+      try {
+        const data = await apiRequest('/search', {
+          method: 'POST',
+          body: JSON.stringify({ school_id: school.id })
+        });
+
+        state.searchResults[school.name] = {
+          loading: false,
+          found: data.found,
+          error: data.error || false,
+          error_message: data.error_message || '',
+          title: data.title || '',
+          date: data.date || '',
+          url: data.url || school.links.grad
+        };
+
+        if (data.found) {
+          state.lastSearchTime = new Date();
+        }
+      } catch (error) {
+        state.searchResults[school.name] = {
+          loading: false,
+          found: false,
+          error: true,
+          error_message: '网络请求失败',
+          url: school.links.grad
+        };
+      }
+
+      updateSearchSummary();
+      render();
+    }
+
+    async function batchSearchSchools(schoolsToSearch) {
+      state.searchResults = {};
+      state.searchSummary = [];
+      state.lastSearchTime = new Date();
+      
+      schoolsToSearch.forEach(school => {
+        state.searchResults[school.name] = { loading: true, found: false, error: false, error_message: '' };
+      });
+      render();
+
+      try {
+        const schoolIds = schoolsToSearch.map(s => s.id);
+        const data = await apiRequest('/search/batch', {
+          method: 'POST',
+          body: JSON.stringify({ school_ids: schoolIds })
+        });
+
+        data.results.forEach(result => {
+          const school = schoolsToSearch.find(s => s.id === result.school_id);
+          if (school) {
+            state.searchResults[school.name] = {
+              loading: false,
+              found: result.found,
+              error: result.error || false,
+              error_message: result.error_message || '',
+              title: result.title || '',
+              date: result.date || '',
+              url: result.url || school.links.grad
+            };
+          }
+        });
+
+        schoolsToSearch.forEach(school => {
+          if (state.searchResults[school.name] && state.searchResults[school.name].loading) {
+            state.searchResults[school.name] = {
+              loading: false,
+              found: false,
+              error: true,
+              error_message: '未返回结果',
+              url: school.links.grad
+            };
+          }
+        });
+      } catch (error) {
+        console.error('Batch search error:', error);
+        schoolsToSearch.forEach(school => {
+          state.searchResults[school.name] = {
+            loading: false,
+            found: false,
+            error: true,
+            error_message: '网络请求失败',
+            url: school.links.grad
+          };
+        });
+      }
+
+      updateSearchSummary();
+      render();
+    }
+
+    function updateSearchSummary() {
+      state.searchSummary = [];
+      
+      for (const [schoolName, result] of Object.entries(state.searchResults)) {
+        if (result.found) {
+          const school = state.schools.find(s => s.name === schoolName);
+          if (school) {
+            state.searchSummary.push({
+              schoolName: school.name,
+              title: result.title,
+              date: result.date,
+              url: result.url,
+              province: school.province
+            });
+          }
+        }
+      }
+
+      state.searchSummary.sort((a, b) => {
+        if (a.date && b.date) {
+          return new Date(b.date) - new Date(a.date);
+        } else if (a.date) {
+          return -1;
+        } else if (b.date) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+
+      render();
+    }
+
+    function getFilteredSchools() {
+      return state.schools.filter(s => {
+        if (state.filters.text && !s.name.includes(state.filters.text) && !s.province.includes(state.filters.text)) return false;
+        if (state.filters.collection === "已收藏" && !state.collections.has(s.name)) return false;
+        if (state.filters.group) {
+          const group = state.groups.find(g => g.id === state.filters.group);
+          if (group) {
+            const groupMemberIds = new Set(group.members.map(m => m.school_id));
+            if (!groupMemberIds.has(s.id)) return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function renderSchoolCard(school) {
+      const result = state.searchResults[school.name] || { loading: false, found: false };
+      const isCollected = state.collections.has(school.name);
+      const isSelected = state.selectedSchools.has(school.id);
+      const cardClass = result.found ? "school-card found" : "school-card";
+      
+      let resultHtml = "";
+      if (result.loading) {
+        resultHtml = `<div class="search-result result-loading">检索中...</div>`;
+      } else if (result.error) {
+        const errorMsg = result.error_message || '检索失败';
+        resultHtml = `<div class="search-result result-error">检索失败: ${errorMsg}</div>`;
+      } else if (result.found) {
+        resultHtml = `
+          <div class="search-result result-found">
+            找到调剂信息 | <a href="${result.url}" target="_blank" style="color: #166534; text-decoration: underline;">查看</a>
+          </div>
+        `;
+      } else if (state.searchResults[school.name] !== undefined) {
+        resultHtml = `<div class="search-result result-not-found">未找到相关调剂信息</div>`;
+      }
+
+      return `
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <input type="checkbox" class="school-checkbox" onclick="toggleSelect(${school.id})" ${isSelected ? 'checked' : ''} style="margin-top: 14px;">
+          <div class="${cardClass} ${isSelected ? 'selected' : ''}" style="${isCollected ? '' : ''} flex: 1;">
+            <div class="card-header">
+              <div style="flex: 1; min-width: 0;">
+                <div class="card-title">
+                  <span class="school-name" style="color: ${isCollected ? '#f59e0b' : '#1e293b'};">${school.name}</span>
+                </div>
+                <div class="card-meta">${school.province}</div>
+                <div class="quick-links">
+                  <a class="quick-link" href="${school.links.main}" target="_blank">官网</a>
+                  <a class="quick-link" href="${school.links.grad}" target="_blank">研究生院</a>
+                  ${school.links.recruit ? `<a class="quick-link" href="${school.links.recruit}" target="_blank">研招公告</a>` : ''}
+                  ${school.links.dept ? `<a class="quick-link" href="${school.links.dept}" target="_blank">心理学院</a>` : ''}
+                </div>
+                ${resultHtml}
+              </div>
+              <div class="card-actions">
+                <button class="card-btn search-btn" onclick='searchSchool调剂Info(${JSON.stringify(school).replace(/'/g, "\\'")})'>检索</button>
+                <button class="card-btn" onclick="toggleCollection(${school.id}, '${school.name}')" style="background: transparent; color: ${isCollected ? '#f59e0b' : '#64748b'}; font-size: 18px; padding: 4px;">
+                  ${isCollected ? '★' : '☆'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      const filtered = getFilteredSchools();
+      const foundCount = Object.values(state.searchResults).filter(r => r.found).length;
+      
+      document.getElementById("school-count").textContent = `${state.schools.length} 所院校`;
+      const selectedCountEl = document.getElementById("selected-count");
+      if (selectedCountEl) {
+        selectedCountEl.textContent = state.selectedSchools.size;
+      }
+      
+      const multiSelectBar = document.getElementById("multi-select-bar");
+      if (multiSelectBar) {
+        multiSelectBar.style.display = state.selectedSchools.size > 0 ? 'flex' : 'none';
+      }
+      
+      const schoolListEl = document.getElementById("school-list");
+      if (schoolListEl) {
+        schoolListEl.innerHTML = filtered.length
+          ? filtered.map(renderSchoolCard).join("")
+          : '<div style="text-align: center; color: #e2e8f0; padding: 60px 0; font-size: 14px;">没有匹配的院校</div>';
+      }
+      
+      renderSearchSummaryToRightPanel();
+      renderFilterNav();
+    }
+
+    function renderNavGroups() {
+      const groupsList = document.getElementById("nav-groups-list");
+      if (!groupsList) return;
+      
+      groupsList.innerHTML = state.groups.map(group => `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button class="nav-btn ${state.filters.group === group.id ? 'active' : ''}" 
+                  onclick="filterByGroup(${group.id})" style="flex: 1; text-align: left; padding: 4px 8px;">
+            ${group.name} (${group.member_count || 0})
+          </button>
+          <button onclick="deleteGroup(${group.id})" style="margin-left: 4px; background: transparent; border: none; color: #cbd5e1; cursor: pointer; padding: 0 4px; font-size: 16px; line-height: 1; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">×</button>
+        </div>
+      `).join('');
+    }
+
+    function showCreateGroupModal() {
+      document.getElementById('create-group-modal').style.display = 'flex';
+    }
+
+    function renderFilterNav() {
+      const navSections = document.querySelectorAll('.nav-section, .nav-scrollable, .nav-fixed-bottom');
+      for (const section of navSections) {
+        section.remove();
+      }
+      
+      const leftNav = document.querySelector('.left-nav');
+      
+      const filterSection = document.createElement('div');
+      filterSection.className = 'nav-section';
+      filterSection.innerHTML = `
+        <div class="nav-section-title">筛选</div>
+        <button class="nav-btn ${!state.filters.group && state.filters.collection === '全部' ? 'active' : ''}" 
+                onclick="clearFilter()">全部</button>
+        <button class="nav-btn ${state.filters.collection === '已收藏' ? 'active' : ''}" 
+                onclick="filterByCollection('已收藏')">已收藏 (${state.collections.size})</button>
+      `;
+      leftNav.appendChild(filterSection);
+      
+      const scrollable = document.createElement('div');
+      scrollable.className = 'nav-scrollable';
+      leftNav.appendChild(scrollable);
+      
+      const groupSection = document.createElement('div');
+      groupSection.className = 'nav-section';
+      groupSection.innerHTML = `
+        <div class="nav-section-title">我的分组</div>
+        <button class="nav-btn" onclick="showCreateGroupModal()" style="background: rgba(59, 130, 246, 0.3); color: #93c5fd;">
+          + 新建分组
+        </button>
+        <div id="nav-groups-list"></div>
+      `;
+      scrollable.appendChild(groupSection);
+      
+      const fixedBottom = document.createElement('div');
+      fixedBottom.className = 'nav-fixed-bottom';
+      leftNav.appendChild(fixedBottom);
+      
+      const searchSection = document.createElement('div');
+      searchSection.className = 'nav-section';
+      searchSection.innerHTML = `
+        <div class="nav-section-title">智能检索</div>
+        <button class="btn-search" style="margin-bottom: 6px;" id="nav-search-all-region1">一键检索</button>
+        <button class="btn-search" style="margin-bottom: 6px;" id="nav-search-all-filtered">检索当前分组</button>
+        <button class="btn-search" style="margin-bottom: 6px;" id="nav-search-selected">检索已选</button>
+        <button class="btn-secondary" id="nav-clear-search-result">清空检索结果</button>
+      `;
+      fixedBottom.appendChild(searchSection);
+      
+      const rulesSection = document.createElement('div');
+      rulesSection.className = 'nav-section';
+      rulesSection.innerHTML = `
+        <div class="nav-section-title">检测规则（智能匹配）</div>
+        <div style="font-size: 10px; color: #cbd5e1; line-height: 1.7;">
+          <div style="color: #4ade80; margin-bottom: 3px;">必须含 2025</div>
+          <div style="color: #93c5fd; margin-bottom: 3px;">必须含 调剂/接收/征集/补录/心理/转专业/实施细则/全日制/本科</div>
+          <div style="color: #fcd34d; margin-bottom: 3px;">排除 2020/2021/2022</div>
+        </div>
+      `;
+      fixedBottom.appendChild(rulesSection);
+      
+      renderNavGroups();
+      
+      setTimeout(() => {
+        document.getElementById("nav-search-all-region1")?.addEventListener("click", () => {
+          batchSearchSchools(state.schools);
+        });
+        document.getElementById("nav-search-all-filtered")?.addEventListener("click", () => {
+          const filtered = getFilteredSchools();
+          batchSearchSchools(filtered);
+        });
+        document.getElementById("nav-search-selected")?.addEventListener("click", () => {
+          const selectedSchools = state.schools.filter(s => state.selectedSchools.has(s.id));
+          if (selectedSchools.length > 0) {
+            batchSearchSchools(selectedSchools);
+          }
+        });
+        document.getElementById("nav-clear-search-result")?.addEventListener("click", clearSearchResults);
+      }, 0);
+    }
+
+    function clearFilter() {
+      state.filters.collection = '全部';
+      state.filters.group = null;
+      render();
+    }
+
+    function filterByCollection(collection) {
+      state.filters.collection = collection;
+      state.filters.group = null;
+      render();
+    }
+
+    function filterByGroup(groupId) {
+      state.filters.group = groupId;
+      state.filters.collection = '全部';
+      render();
+    }
+
+    function toggleSelect(schoolId) {
+      if (state.selectedSchools.has(schoolId)) {
+        state.selectedSchools.delete(schoolId);
+      } else {
+        state.selectedSchools.add(schoolId);
+      }
+      render();
+    }
+
+    function clearSelection() {
+      state.selectedSchools.clear();
+      render();
+    }
+
+    async function toggleCollection(schoolId, schoolName) {
+      try {
+        if (state.collections.has(schoolName)) {
+          await apiRequest('/collections', {
+            method: 'DELETE',
+            body: JSON.stringify({ school_id: schoolId })
+          });
+          state.collections.delete(schoolName);
+        } else {
+          await apiRequest('/collections', {
+            method: 'POST',
+            body: JSON.stringify({ school_id: schoolId })
+          });
+          state.collections.add(schoolName);
+        }
+        render();
+      } catch (error) {
+        console.error('收藏操作失败:', error);
+      }
+    }
+
+    async function createGroup() {
+      const name = document.getElementById('new-group-name').value.trim();
+      if (!name) return;
+      
+      try {
+        await apiRequest('/groups', {
+          method: 'POST',
+          body: JSON.stringify({ name: name })
+        });
+        document.getElementById('new-group-name').value = '';
+        document.getElementById('create-group-modal').style.display = 'none';
+        await loadGroups();
+        render();
+      } catch (error) {
+        console.error('创建分组失败:', error);
+      }
+    }
+
+    async function deleteGroup(groupId) {
+      try {
+        await apiRequest(`/groups/${groupId}`, {
+          method: 'DELETE'
+        });
+        if (state.filters.group === groupId) {
+          state.filters.group = null;
+        }
+        await loadGroups();
+        render();
+      } catch (error) {
+        console.error('删除分组失败:', error);
+      }
+    }
+
+    function showAddToGroupModal() {
+      const modal = document.getElementById('add-to-group-modal');
+      const list = document.getElementById('group-select-list');
+      
+      list.innerHTML = state.groups.length === 0 
+        ? '<div style="text-align: center; color: #64748b; padding: 20px;">暂未创建分组</div>'
+        : state.groups.map(group => `
+          <button class="nav-btn" onclick="addToGroup(${group.id})" style="margin-bottom: 4px;">
+            ${group.name} (${group.member_count || 0})
+          </button>
+        `).join('');
+      
+      modal.style.display = 'flex';
+    }
+
+    async function addToGroup(groupId) {
+      try {
+        for (const schoolId of state.selectedSchools) {
+          await apiRequest(`/groups/${groupId}/members`, {
+            method: 'POST',
+            body: JSON.stringify({ school_id: schoolId })
+          });
+        }
+        state.selectedSchools.clear();
+        document.getElementById('add-to-group-modal').style.display = 'none';
+        await loadGroups();
+        render();
+      } catch (error) {
+        console.error('添加到分组失败:', error);
+      }
+    }
+
+    async function createAndAddToGroup() {
+      const name = document.getElementById('new-group-name-add').value.trim();
+      if (!name) return;
+      
+      try {
+        const response = await apiRequest('/groups', {
+          method: 'POST',
+          body: JSON.stringify({ name: name })
+        });
+        
+        const groupId = response.id;
+        for (const schoolId of state.selectedSchools) {
+          await apiRequest(`/groups/${groupId}/members`, {
+            method: 'POST',
+            body: JSON.stringify({ school_id: schoolId })
+          });
+        }
+        
+        state.selectedSchools.clear();
+        document.getElementById('new-group-name-add').value = '';
+        document.getElementById('add-to-group-modal').style.display = 'none';
+        await loadGroups();
+        render();
+      } catch (error) {
+        console.error('创建分组并添加失败:', error);
+      }
+    }
+
+    function renderSearchSummaryToRightPanel() {
+      const existingSummary = document.getElementById('search-summary-panel');
+      const existingWrapper = document.getElementById('search-summary-wrapper');
+      if (existingSummary) existingSummary.remove();
+      if (existingWrapper) existingWrapper.remove();
+      
+      const filtered = getFilteredSchools();
+      const foundSearchCount = Object.values(state.searchResults).filter(r => r.found).length;
+      
+      const searchResults = Object.values(state.searchResults);
+      const completedCount = searchResults.filter(r => !r.loading).length;
+      const errorCount = searchResults.filter(r => r.error).length;
+      const foundCount = searchResults.filter(r => r.found).length;
+      const notFoundCount = searchResults.filter(r => !r.loading && !r.found && !r.error).length;
+      
+      const wrapper = document.createElement('div');
+      wrapper.id = 'search-summary-wrapper';
+      wrapper.className = 'search-summary-panel-wrapper';
+      
+      const statsPanel = document.createElement('div');
+      statsPanel.style.cssText = 'margin-bottom: 12px; flex-shrink: 0;';
+      statsPanel.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 6px; color: #f8fafc;">
+          <div style="display: flex; gap: 8px; font-size: 13px; font-weight: 600;">
+            <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">显示 <b style="color: #ffffff;">${filtered.length}</b> 所</span>
+          </div>
+          <div style="display: flex; gap: 8px; font-size: 13px; font-weight: 600;">
+            <span style="color: #4ade80; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">找到 ${foundSearchCount} 条调剂信息</span>
+            <span style="color: #93c5fd; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">已选 ${state.selectedSchools.size} 所</span>
+          </div>
+        </div>
+      `;
+      wrapper.appendChild(statsPanel);
+      
+      const summaryPanel = document.createElement('div');
+      summaryPanel.id = 'search-summary-panel';
+      summaryPanel.style.cssText = 'background: rgba(255, 255, 255, 0.9); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; flex: 1;';
+      
+      summaryPanel.innerHTML = `
+        <div class="panel-title" style="color: #374151; font-size: 14px; font-weight: 800; flex-shrink: 0;">检索结果汇总 (${state.searchSummary.length})</div>
+        <div style="flex: 1; overflow-y: auto; min-height: 0;">
+          ${renderSearchSummary()}
+        </div>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; flex-shrink: 0;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+            <span style="color: #374151;">检索完成:</span>
+            <span style="color: #1f2937;">${completedCount}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+            <span style="color: #374151;">检索失败:</span>
+            <span style="color: #dc2626;">${errorCount}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+            <span style="color: #374151;">找到信息:</span>
+            <span style="color: #22c55e;">${foundCount}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+            <span style="color: #374151;">未找到信息:</span>
+            <span style="color: #f59e0b;">${notFoundCount}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px;">
+            <span style="color: #374151;">上次检索时间:</span>
+            <span style="color: #60a5fa;">${state.lastSearchTime ? state.lastSearchTime.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '未检索'}</span>
+          </div>
+        </div>
+      `;
+      
+      wrapper.appendChild(summaryPanel);
+      
+      const rightPanel = document.querySelector('.right-panel');
+      if (rightPanel) {
+        rightPanel.appendChild(wrapper);
+      }
+    }
+
+    async function exportExcel() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/export/csv`);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `心理学调剂监控_${new Date().toLocaleDateString("zh-CN").replace(/\//g,"-")}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('导出失败:', error);
+        alert('导出失败，请重试');
+      }
+    }
+
+    function clearSearchResults() {
+      state.searchResults = {};
+      state.searchSummary = [];
+      render();
+    }
+
+    function renderSearchSummary() {
+      if (state.searchSummary.length === 0) {
+        return '<div style="text-align: center; color: #374151; padding: 20px 0; font-size: 12px;">暂无检索结果</div>';
+      }
+
+      return state.searchSummary.map(item => `
+        <div class="summary-item" style="padding: 10px; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onclick="highlightSchool('${item.schoolName}')">
+          <div style="font-size: 12px; font-weight: 600; color: #1f2937; margin-bottom: 4px;">${item.schoolName}</div>
+          <div style="font-size: 11px; color: #374151; margin-bottom: 3px; line-height: 1.3;">${item.title}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 10px; color: #374151;">${item.date}</div>
+            <a href="${item.url}" target="_blank" style="font-size: 10px; color: #60a5fa; text-decoration: none;">查看</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function highlightSchool(schoolName) {
+      document.querySelectorAll('.school-card').forEach(card => {
+        card.style.boxShadow = 'none';
+      });
+      const cards = document.querySelectorAll('.school-card');
+      for (const card of cards) {
+        const nameElement = card.querySelector('.school-name');
+        if (nameElement && nameElement.textContent === schoolName) {
+          card.style.boxShadow = '0 0 0 2px #60a5fa';
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          break;
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadSchools();
+
+      document.getElementById("search-input").addEventListener("input", (e) => {
+        state.filters.text = e.target.value;
+        render();
+      });
+
+      document.getElementById("cancel-create-group").addEventListener("click", () => {
+        document.getElementById("create-group-modal").style.display = 'none';
+      });
+      document.getElementById("confirm-create-group").addEventListener("click", createGroup);
+
+      document.getElementById("add-to-group-btn").addEventListener("click", showAddToGroupModal);
+      document.getElementById("cancel-add-group").addEventListener("click", () => {
+        document.getElementById("add-to-group-modal").style.display = 'none';
+      });
+      document.getElementById("clear-selection-btn").addEventListener("click", clearSelection);
+      document.getElementById("create-and-add-btn").addEventListener("click", createAndAddToGroup);
+
+      document.getElementById("new-group-name").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          createGroup();
+        }
+      });
+
+      document.getElementById("new-group-name-add").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          createAndAddToGroup();
+        }
+      });
+
+      document.getElementById("create-group-modal").addEventListener("click", (e) => {
+        if (e.target.id === "create-group-modal") {
+          document.getElementById("create-group-modal").style.display = 'none';
+        }
+      });
+      document.getElementById("add-to-group-modal").addEventListener("click", (e) => {
+        if (e.target.id === "add-to-group-modal") {
+          document.getElementById("add-to-group-modal").style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

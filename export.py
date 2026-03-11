@@ -3,7 +3,7 @@ from models import db, School, SearchResult, Collection
 import os
 import datetime
 
-def export_to_excel():
+def export_to_csv():
     """Export search results to CSV"""
     # 获取所有学校
     schools = School.query.all()

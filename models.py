@@ -34,6 +34,7 @@ class SearchResult(db.Model):
     school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
     found = db.Column(db.Boolean, default=False)
     error = db.Column(db.Boolean, default=False)
+    error_message = db.Column(db.String(200), nullable=True)
     title = db.Column(db.String(500), nullable=True)
     date = db.Column(db.String(50), nullable=True)
     url = db.Column(db.String(500), nullable=True)
@@ -48,6 +49,7 @@ class SearchResult(db.Model):
             'school_name': self.school.name if self.school else '',
             'found': self.found,
             'error': self.error,
+            'error_message': self.error_message,
             'title': self.title,
             'date': self.date,
             'url': self.url,
@@ -62,3 +64,47 @@ class Collection(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
     school = db.relationship('School')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'school_id': self.school_id,
+            'school_name': self.school.name if self.school else '',
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+class Group(db.Model):
+    __tablename__ = 'groups'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    members = db.relationship('GroupMember', backref='group', cascade='all, delete-orphan')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'member_count': len(self.members)
+        }
+
+class GroupMember(db.Model):
+    __tablename__ = 'group_members'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=False)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    school = db.relationship('School')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'group_id': self.group_id,
+            'school_id': self.school_id,
+            'school_name': self.school.name if self.school else '',
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
